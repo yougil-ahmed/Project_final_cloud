@@ -25,3 +25,7 @@ exports.login = async (req, res) => {
   const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET);
   res.json({ token, user });
 };
+
+exports.logout = (req, res) => {
+  res.json({ message: 'Déconnexion réussie.' });
+};

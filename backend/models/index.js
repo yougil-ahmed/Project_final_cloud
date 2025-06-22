@@ -23,20 +23,20 @@ db.EmploiDuTemps = require('./emploidutemps')(sequelize, Sequelize.DataTypes);
 // Define relationships
 
 // User <=> Module (professeur)
-db.User.hasMany(db.Module, { foreignKey: 'professeurId' });
+db.User.hasMany(db.Module, { foreignKey: 'professeurId', as: 'modules' });
 db.Module.belongsTo(db.User, { foreignKey: 'professeurId', as: 'professeur' });
 
 // User <=> Note (stagiaire)
-db.User.hasMany(db.Note, { foreignKey: 'stagiaireId' });
+db.User.hasMany(db.Note, { foreignKey: 'stagiaireId', as: 'notes' });
 db.Note.belongsTo(db.User, { foreignKey: 'stagiaireId', as: 'stagiaire' });
 
 // Module <=> Note
-db.Module.hasMany(db.Note, { foreignKey: 'moduleId' });
-db.Note.belongsTo(db.Module, { foreignKey: 'moduleId' });
+db.Module.hasMany(db.Note, { foreignKey: 'moduleId', as: 'notes' });
+db.Note.belongsTo(db.Module, { foreignKey: 'moduleId', as: 'module' });
 
 // User <=> EmploiDuTemps
-db.User.hasMany(db.EmploiDuTemps, { foreignKey: 'userId' });
-db.EmploiDuTemps.belongsTo(db.User, { foreignKey: 'userId' });
+db.User.hasMany(db.EmploiDuTemps, { foreignKey: 'userId', as: 'emploiDuTemps' });
+db.EmploiDuTemps.belongsTo(db.User, { foreignKey: 'userId', as: 'user' });
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

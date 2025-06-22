@@ -15,6 +15,10 @@ app.use('/api/modules', moduleRoutes);
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
 
+const noteRoutes = require('./routes/noteRoutes');
+app.use('/api/notes', noteRoutes);
+
+
 
 // const schoolRoutes = require('./routes/school');
 // app.use('/api/school', schoolRoutes);
