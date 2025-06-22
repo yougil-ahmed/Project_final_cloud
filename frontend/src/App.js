@@ -10,6 +10,7 @@ import DashboardStagiaire from './pages/DashboardStagiaire';
 import PrivateRoute from './components/PrivateRoute';
 import Modules from './pages/Modules';
 import Register from './pages/Register';
+import Users from './pages/Users';
 
 function App() {
   return (
@@ -49,7 +50,13 @@ function App() {
           <Route path="/modules" element={
             // <PrivateRoute roles={['admin', 'professeur']}>
               <Modules />
-            // </PrivateRoute>
+            // {/* </PrivateRoute> */}
+          } />
+
+          <Route path="/users" element={
+            // <PrivateRoute roles={['admin']}>
+              <Users />
+            // {/* </PrivateRoute> */}
           } />
 
           <Route path="*" element={<Login />} />

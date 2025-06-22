@@ -16,6 +16,10 @@ const Modules = () => {
     fetchModules();
   }, []);
 
+  const findModuleById = id => {
+    return modules.find(module => module.id === id);
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     if(editId) {
