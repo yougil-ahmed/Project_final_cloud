@@ -13,7 +13,6 @@ import Register from './pages/Register';
 import Users from './pages/Users';
 import Notes from './pages/Notes';
 import Layout from './components/Layout/Layout';
-import Classrooms from './pages/Classrooms';
 
 function App() {
   return (
