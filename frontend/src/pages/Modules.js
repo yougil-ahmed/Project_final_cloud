@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../api/axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Modules = () => {
   const [modules, setModules] = useState([]);
@@ -7,16 +9,25 @@ const Modules = () => {
   const [professeurId, setProfesseurId] = useState('');
   const [editId, setEditId] = useState(null);
   const [professeurs, setProfesseurs] = useState([]);
+  const [errors, setErrors] = useState({});
 
   const fetchModules = async () => {
+    try {
       const res = await axios.get('http://localhost:5000/api/modules');
-    setModules(res.data);
+      setModules(res.data);
+    } catch (err) {
+      toast.error("Erreur lors du chargement des modules.");
+    }
   };
 
   const fetchProfesseurs = async () => {
-    const res = await axios.get('http://localhost:5000/api/users');
+    try {
+      const res = await axios.get('http://localhost:5000/api/users');
       const users = res.data.users || res.data;
-    setProfesseurs(users.filter(user => user.role === 'professeur'));
+      setProfesseurs(users.filter(user => user.role === 'professeur'));
+    } catch (err) {
+      toast.error("Erreur lors du chargement des professeurs.");
+    }
   };
 
   useEffect(() => {
@@ -24,36 +35,59 @@ const Modules = () => {
     fetchProfesseurs();
   }, []);
 
-  const findModuleById = id => {
-    return modules.find(module => module.id === id);
+  const validate = () => {
+    const newErrors = {};
+    if (!name.trim()) newErrors.name = "Le nom du module est requis.";
+    if (!professeurId) newErrors.professeurId = "Le professeur est requis.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if(editId) {
-      await axios.put(`http://localhost:5000/api/modules/${editId}`, { name, professeurId });
-    } else {
-      await axios.post('http://localhost:5000/api/modules', { name, professeurId });
+    if (!validate()) {
+      toast.error("Veuillez corriger les erreurs du formulaire.");
+      return;
     }
-    setName('');
-    setProfesseurId('');
-    setEditId(null);
-    fetchModules();
+    try {
+      if (editId) {
+        await axios.put(`http://localhost:5000/api/modules/${editId}`, { name, professeurId });
+        toast.success("Module modifié avec succès !");
+      } else {
+        await axios.post('http://localhost:5000/api/modules', { name, professeurId });
+        toast.success("Module ajouté avec succès !");
+      }
+      setName('');
+      setProfesseurId('');
+      setEditId(null);
+      setErrors({});
+      fetchModules();
+    } catch (err) {
+      toast.error("Erreur lors de l'enregistrement du module.");
+    }
   };
 
   const handleEdit = module => {
     setEditId(module.id);
     setName(module.name);
     setProfesseurId(module.professeurId);
+    setErrors({});
   };
 
   const handleDelete = async id => {
-    await axios.delete(`http://localhost:5000/api/modules/${id}`);
-    fetchModules();
+    if (!window.confirm("Voulez-vous vraiment supprimer ce module ?")) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/modules/${id}`);
+      toast.success("Module supprimé avec succès !");
+      fetchModules();
+    } catch (err) {
+      toast.error("Erreur lors de la suppression du module.");
+    }
   };
 
   return (
     <div className="module-management-container">
+      <ToastContainer />
       <h2 className="module-management-title">Gestion des Modules</h2>
       <form onSubmit={handleSubmit} className="module-form">
         <div className="form-group">
@@ -65,6 +99,7 @@ const Modules = () => {
             className="form-input"
             required
           />
+          {errors.name && <div className="form-error">{errors.name}</div>}
         </div>
         <div className="form-group">
           <select
@@ -81,6 +116,7 @@ const Modules = () => {
               </option>
             ))}
           </select>
+          {errors.professeurId && <div className="form-error">{errors.professeurId}</div>}
         </div>
         <button type="submit" className="submit-btn">
           {editId ? 'Modifier' : 'Ajouter'}

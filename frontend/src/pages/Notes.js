@@ -1,6 +1,7 @@
-// Notes.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Notes = () => {
   const [notes, setNotes] = useState([]);
@@ -12,12 +13,22 @@ const Notes = () => {
     stagiaireId: '',
   });
   const [editingNoteId, setEditingNoteId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    fetchNotes();
-    fetchStagiaires();
-    fetchModules();
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      await Promise.all([fetchNotes(), fetchStagiaires(), fetchModules()]);
+    } catch (error) {
+      toast.error('Erreur lors du chargement des données');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchNotes = async () => {
     const res = await axios.get('http://localhost:5000/api/notes');
@@ -29,8 +40,7 @@ const Notes = () => {
     const users = res.data.users || res.data;
     setStagiaires(users.filter(user => user.role === 'stagiaire'));
   };
-  
-  // hadi chi sa3a o ana m9atl m3aha lokan machi gpt ga3 ma nselekehache
+
   const fetchModules = async () => {
     const token = localStorage.getItem('token');
     const res = await axios.get('http://localhost:5000/api/modules', {
@@ -40,24 +50,50 @@ const Notes = () => {
     });
     setModules(res.data.modules || res.data);
   };
-  
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const validateForm = () => {
+    if (!form.value || isNaN(form.value) || parseFloat(form.value) < 0 || parseFloat(form.value) > 20) {
+      toast.error('Veuillez entrer une note valide (entre 0 et 20)');
+      return false;
+    }
+    if (!form.stagiaireId) {
+      toast.error('Veuillez sélectionner un stagiaire');
+      return false;
+    }
+    if (!form.moduleId) {
+      toast.error('Veuillez sélectionner un module');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
 
-    if (editingNoteId) {
-      await axios.put(`http://localhost:5000/api/notes/${editingNoteId}`, form);
-      setEditingNoteId(null);
-    } else {
-      await axios.post('http://localhost:5000/api/notes', form);
+    try {
+      setIsLoading(true);
+      if (editingNoteId) {
+        await axios.put(`http://localhost:5000/api/notes/${editingNoteId}`, form);
+        toast.success('Note modifiée avec succès');
+        setEditingNoteId(null);
+      } else {
+        await axios.post('http://localhost:5000/api/notes', form);
+        toast.success('Note ajoutée avec succès');
+      }
+
+      setForm({ value: '', moduleId: '', stagiaireId: '' });
+      await fetchNotes();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Une erreur est survenue');
+    } finally {
+      setIsLoading(false);
     }
-
-    setForm({ value: '', moduleId: '', stagiaireId: '' });
-    fetchNotes();
   };
 
   const handleEdit = (note) => {
@@ -67,15 +103,27 @@ const Notes = () => {
       stagiaireId: note.stagiaireId,
     });
     setEditingNoteId(note.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`http://localhost:5000/api/notes/${id}`);
-    fetchNotes();
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette note ?')) {
+      try {
+        setIsLoading(true);
+        await axios.delete(`http://localhost:5000/api/notes/${id}`);
+        toast.success('Note supprimée avec succès');
+        await fetchNotes();
+      } catch (error) {
+        toast.error(error.response?.data?.message || 'Une erreur est survenue');
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   return (
     <div className="grades-container">
+      <ToastContainer position="top-right" autoClose={3000} />
         <h2 className="grades-title">Gestion des Notes</h2>
 
         <form onSubmit={handleSubmit} className="grades-form">
@@ -174,7 +222,7 @@ const Notes = () => {
             ))}
             </tbody>
         </table>
-        </div>
+      </div>
   );
 };
 

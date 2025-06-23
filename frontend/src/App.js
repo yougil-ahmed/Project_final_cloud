@@ -53,7 +53,7 @@ function App() {
             <Route path="/modules" element={
               // <PrivateRoute roles={['admin', 'professeur']}>
                 <Modules />
-              // {/* </PrivateRoute> */}
+              // </PrivateRoute>
             } />
 
             <Route path="/users" element={
