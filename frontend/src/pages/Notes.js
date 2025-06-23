@@ -14,6 +14,7 @@ const Notes = () => {
   });
   const [editingNoteId, setEditingNoteId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -31,24 +32,49 @@ const Notes = () => {
   };
 
   const fetchNotes = async () => {
-    const res = await axios.get('http://localhost:5000/api/notes');
-    setNotes(res.data);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get('http://localhost:5000/api/notes', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setNotes(res.data);
+    } catch (error) {
+      toast.error('Erreur lors du chargement des notes');
+      throw error;
+    }
   };
 
   const fetchStagiaires = async () => {
-    const res = await axios.get('http://localhost:5000/api/users');
-    const users = res.data.users || res.data;
-    setStagiaires(users.filter(user => user.role === 'stagiaire'));
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get('http://localhost:5000/api/users', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const users = res.data.users || res.data;
+      setStagiaires(users.filter(user => user.role === 'stagiaire'));
+    } catch (error) {
+      toast.error('Erreur lors du chargement des stagiaires');
+      throw error;
+    }
   };
 
   const fetchModules = async () => {
-    const token = localStorage.getItem('token');
-    const res = await axios.get('http://localhost:5000/api/modules', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    setModules(res.data.modules || res.data);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get('http://localhost:5000/api/modules', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setModules(res.data.modules || res.data);
+    } catch (error) {
+      toast.error('Erreur lors du chargement des modules');
+      throw error;
+    }
   };
 
   const handleChange = (e) => {
@@ -56,7 +82,8 @@ const Notes = () => {
   };
 
   const validateForm = () => {
-    if (!form.value || isNaN(form.value) || parseFloat(form.value) < 0 || parseFloat(form.value) > 20) {
+    const noteValue = parseFloat(form.value);
+    if (isNaN(noteValue) || noteValue < 0 || noteValue > 20) {
       toast.error('Veuillez entrer une note valide (entre 0 et 20)');
       return false;
     }
@@ -77,13 +104,20 @@ const Notes = () => {
     if (!validateForm()) return;
 
     try {
-      setIsLoading(true);
+      setIsSubmitting(true);
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+
       if (editingNoteId) {
-        await axios.put(`http://localhost:5000/api/notes/${editingNoteId}`, form);
+        await axios.put(`http://localhost:5000/api/notes/${editingNoteId}`, form, config);
         toast.success('Note modifiée avec succès');
         setEditingNoteId(null);
       } else {
-        await axios.post('http://localhost:5000/api/notes', form);
+        await axios.post('http://localhost:5000/api/notes', form, config);
         toast.success('Note ajoutée avec succès');
       }
 
@@ -92,7 +126,7 @@ const Notes = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || 'Une erreur est survenue');
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -110,7 +144,12 @@ const Notes = () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette note ?')) {
       try {
         setIsLoading(true);
-        await axios.delete(`http://localhost:5000/api/notes/${id}`);
+        const token = localStorage.getItem('token');
+        await axios.delete(`http://localhost:5000/api/notes/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         toast.success('Note supprimée avec succès');
         await fetchNotes();
       } catch (error) {
@@ -124,105 +163,125 @@ const Notes = () => {
   return (
     <div className="grades-container">
       <ToastContainer position="top-right" autoClose={3000} />
-        <h2 className="grades-title">Gestion des Notes</h2>
+      <h2 className="grades-title">Gestion des Notes</h2>
 
-        <form onSubmit={handleSubmit} className="grades-form">
-            <input
-            type="number"
-            name="value"
-            placeholder="Valeur de la note"
-            value={form.value}
-            onChange={handleChange}
-            className="grades-input"
-            step="0.01"
-            required
-            />
+      <form onSubmit={handleSubmit} className="grades-form">
+        <input
+          type="number"
+          name="value"
+          placeholder="Valeur de la note"
+          value={form.value}
+          onChange={handleChange}
+          className="grades-input"
+          step="0.01"
+          min="0"
+          max="20"
+          required
+        />
 
-            <select
-            name="stagiaireId"
-            value={form.stagiaireId}
-            onChange={handleChange}
-            className="grades-select"
-            required
-            >
-            <option value="">-- Choisir un stagiaire --</option>
-            {stagiaires.map((s) => (
-                <option key={s.id} value={s.id}>
-                {s.name}
-                </option>
-            ))}
-            </select>
+        <select
+          name="stagiaireId"
+          value={form.stagiaireId}
+          onChange={handleChange}
+          className="grades-select"
+          required
+        >
+          <option value="">-- Choisir un stagiaire --</option>
+          {stagiaires.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
 
-            <select
-            name="moduleId"
-            value={form.moduleId}
-            onChange={handleChange}
-            className="grades-select"
-            required
-            >
-            <option value="">-- Choisir un module --</option>
-            {modules.map((m) => (
-                <option key={m.id} value={m.id}>
-                {m.name}
-                </option>
-            ))}
-            </select>
+        <select
+          name="moduleId"
+          value={form.moduleId}
+          onChange={handleChange}
+          className="grades-select"
+          required
+        >
+          <option value="">-- Choisir un module --</option>
+          {modules.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
+          ))}
+        </select>
 
-            <button type="submit" className="grades-submit-btn">
-            {editingNoteId ? 'Modifier' : 'Ajouter'}
-            </button>
-        </form>
+        <button 
+          type="submit" 
+          className="grades-submit-btn"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'En cours...' : editingNoteId ? 'Modifier' : 'Ajouter'}
+        </button>
+      </form>
 
+      {isLoading ? (
+        <div className="loading-indicator">Chargement en cours...</div>
+      ) : (
         <table className="grades-table">
-            <thead className="grades-table-header">
+          <thead className="grades-table-header">
             <tr>
-                <th>#</th>
-                <th>Note</th>
-                <th>Stagiaire</th>
-                <th>Module</th>
-                <th>Actions</th>
+              <th>#</th>
+              <th>Note</th>
+              <th>Stagiaire</th>
+              <th>Module</th>
+              <th>Actions</th>
             </tr>
-            </thead>
-            <tbody className="grades-table-body">
-            {notes.map((note) => (
+          </thead>
+          <tbody className="grades-table-body">
+            {notes.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="grades-empty-state">
+                  Aucune note trouvée
+                </td>
+              </tr>
+            ) : (
+              notes.map((note) => (
                 <tr key={note.id}>
-                <td className="grades-table-cell">
+                  <td className="grades-table-cell">
                     <span className="grades-table-id">{note.id}</span>
-                </td>
-                <td className="grades-table-cell">
+                  </td>
+                  <td className="grades-table-cell">
                     <span className="grades-table-value">{note.value}</span>
-                </td>
-                <td className="grades-table-cell">
+                  </td>
+                  <td className="grades-table-cell">
                     <span className="grades-table-name">
-                    {note.stagiaire?.name || <span className="grades-not-found">Non trouvé</span>}
+                      {note.stagiaire?.name || <span className="grades-not-found">Non trouvé</span>}
                     </span>
-                </td>
-                <td className="grades-table-cell">
+                  </td>
+                  <td className="grades-table-cell">
                     <span className="grades-table-module">
-                    {note.module?.name || <span className="grades-not-found">Non trouvé</span>}
+                      {note.module?.name || <span className="grades-not-found">Non trouvé</span>}
                     </span>
-                </td>
-                <td className="grades-table-cell">
+                  </td>
+                  <td className="grades-table-cell">
                     <div className="grades-actions">
-                    <button
+                      <button
                         onClick={() => handleEdit(note)}
                         className="grades-edit-btn"
-                    >
+                        disabled={isLoading}
+                      >
                         Modifier
-                    </button>
-                    <button
+                      </button>
+                      <button
                         onClick={() => handleDelete(note.id)}
                         className="grades-delete-btn"
-                    >
+                        disabled={isLoading}
+                      >
                         Supprimer
-                    </button>
+                      </button>
                     </div>
-                </td>
+                  </td>
                 </tr>
-            ))}
-            </tbody>
+              ))
+            )}
+          </tbody>
         </table>
-      </div>
+      )}
+    </div>
   );
 };
 
