@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      // User.belongsTo(models.Class, {
+      //   foreignKey: "classId",
+      //   as: "class",
+      // });
     }
   }
   User.init({
@@ -20,7 +24,16 @@ module.exports = (sequelize, DataTypes) => {
       unique: true
     },
     password: DataTypes.STRING,
-    role: DataTypes.ENUM('admin', 'professeur', 'stagiaire')
+    role: DataTypes.ENUM('admin', 'professeur', 'stagiaire'),
+    classeId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'Classes',
+        key: 'id'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    }
   }, {
     sequelize,
     modelName: 'User',

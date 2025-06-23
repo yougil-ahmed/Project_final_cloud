@@ -14,19 +14,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   EmploiDuTemps.init({
-    userId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Users',
-        key: 'id'
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE'
-    },    
-    day: DataTypes.STRING,
-    startTime: DataTypes.STRING,
-    endTime: DataTypes.STRING,
-    module: DataTypes.STRING
+    startTime: DataTypes.DATE,
+    endTime: DataTypes.DATE,
+    file: DataTypes.STRING,
+    classId: DataTypes.INTEGER,
+    professeurId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'EmploiDuTemps',

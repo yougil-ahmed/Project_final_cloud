@@ -17,11 +17,17 @@ const Sidebar = () => {
                 <Link to="/modules" className="sidebar-link modules">Modules</Link>
             </li>
             <li className="sidebar-menu-item">
-                <Link to="/login" className="sidebar-link login">Login</Link>
+                <Link to="/classes" className="sidebar-link classes">Classes</Link>
             </li>
             <li className="sidebar-menu-item">
-                <Link to="/register" className="sidebar-link register">Register</Link>
+                <Link to="/emplois" className="sidebar-link emplois">Emplois</Link>
             </li>
+            <li className="sidebar-menu-item">
+                <Link to="/login" className="sidebar-link login">Login</Link>
+            </li>
+            {/* <li className="sidebar-menu-item">
+                <Link to="/register" className="sidebar-link register">Register</Link>
+            </li> */}
             
             <li className="sidebar-menu-item">
                 <Link to="/logout" className="sidebar-link logout">Logout</Link>

@@ -1,7 +1,7 @@
 const { User } = require('../models');
 const bcrypt = require('bcrypt');
 
-// 🔹 Create new user
+// Create new user
 exports.createUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -13,20 +13,20 @@ exports.createUser = async (req, res) => {
   }
 };
 
-// 🔹 Get all users
+// Get all users
 exports.getAllUsers = async (req, res) => {
   const users = await User.findAll();
   res.json(users);
 };
 
-// 🔹 Get user by ID
+// Get user by ID
 exports.getUserById = async (req, res) => {
   const user = await User.findByPk(req.params.id);
   if (!user) return res.status(404).json({ message: 'User not found' });
   res.json(user);
 };
 
-// 🔹 Update user
+// Update user
 exports.updateUser = async (req, res) => {
   const user = await User.findByPk(req.params.id);
   if (!user) return res.status(404).json({ message: 'User not found' });
@@ -36,7 +36,7 @@ exports.updateUser = async (req, res) => {
   res.json(user);
 };
 
-// 🔹 Delete user
+// Delete user
 exports.deleteUser = async (req, res) => {
   const user = await User.findByPk(req.params.id);
   if (!user) return res.status(404).json({ message: 'User not found' });

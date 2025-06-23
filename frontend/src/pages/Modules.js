@@ -15,6 +15,8 @@ const Modules = () => {
     try {
       const res = await axios.get('http://localhost:5000/api/modules');
       setModules(res.data);
+      console.log(modules);
+      
     } catch (err) {
       toast.error("Erreur lors du chargement des modules.");
     }

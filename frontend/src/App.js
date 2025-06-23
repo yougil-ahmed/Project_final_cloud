@@ -1,7 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import './App.css'; // Assuming you have some global styles
+import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 import Login from './pages/Login';
 import DashboardAdmin from './pages/DashboardAdmin';
@@ -13,6 +15,8 @@ import Register from './pages/Register';
 import Users from './pages/Users';
 import Notes from './pages/Notes';
 import Layout from './components/Layout/Layout';
+import Classes from './pages/Classes';
+import EmploiDuTemps from './pages/EmploiDuTemps';
 
 function App() {
   return (
@@ -56,6 +60,12 @@ function App() {
               // </PrivateRoute>
             } />
 
+            <Route path="/classes" element={
+              // <PrivateRoute roles={['admin', 'professeur']}>
+                <Classes />
+              // </PrivateRoute>
+            } />
+
             <Route path="/users" element={
               // <PrivateRoute roles={['admin']}>
                 <Users />
@@ -65,6 +75,12 @@ function App() {
             <Route path="/notes" element={
               // <PrivateRoute roles={['admin', 'professeur']}>
                 <Notes />
+              // {/* </PrivateRoute> */}
+            } />
+
+            <Route path="/emplois" element={
+              // <PrivateRoute roles={['admin', 'professeur']}>
+                <EmploiDuTemps />
               // {/* </PrivateRoute> */}
             } />
 
