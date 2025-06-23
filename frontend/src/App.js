@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import Users from './pages/Users';
 import Notes from './pages/Notes';
 import Layout from './components/Layout/Layout';
+import Classrooms from './pages/Classrooms';
 
 function App() {
   return (
@@ -65,6 +66,12 @@ function App() {
             <Route path="/notes" element={
               // <PrivateRoute roles={['admin', 'professeur']}>
                 <Notes />
+              // {/* </PrivateRoute> */}
+            } />
+
+            <Route path="/classrooms" element={
+              // <PrivateRoute roles={['admin', 'professeur']}>
+                <Classrooms />
               // {/* </PrivateRoute> */}
             } />
 
